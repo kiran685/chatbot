@@ -1,0 +1,131 @@
+<!-- Login Page -->
+<!DOCTYPE html>
+<html>
+<head><title>Login</title></head>
+<body>
+<h2>Login</h2>
+<form action="/login" method="post">
+  <input name="username" placeholder="Username" required><br>
+  <input type="password" name="password" placeholder="Password" required><br>
+  <button type="submit">Login</button>
+</form>
+<p>Don't have an account? <a href="/signup">Sign Up</a></p>
+</body>
+</html>
+
+<!-- Signup Page -->
+<!DOCTYPE html>
+<html>
+<head><title>Signup</title></head>
+<body>
+<h2>Sign Up</h2>
+<form action="/signup" method="post">
+  <input name="username" placeholder="Username" required><br>
+  <input type="password" name="password" placeholder="Password" required><br>
+  <button type="submit">Register</button>
+</form>
+<p>Already have an account? <a href="/login">Login</a></p>
+</body>
+</html>
+
+<!-- ChatBot Page -->
+<!DOCTYPE html>
+<html>
+<head><title>ChatBot</title></head>
+<body>
+<h2>ChatBot</h2>
+<div id="chat-box"></div>
+<input type="text" id="message" placeholder="Type your message...">
+<button onclick="sendMessage()">Send</button>
+
+<p><a href="/history">📜 View Chat History</a> | <a href="/logout">Logout</a></p>
+
+<script>
+function sendMessage() {
+    const message = document.getElementById("message").value;
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: "message=" + encodeURIComponent(message)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("chat-box").innerHTML += `<p><b>You:</b> ${message}</p><p><b>Bot:</b> ${data.response}</p>`;
+        document.getElementById("message").value = "";
+    });
+}
+</script>
+</body>
+</html>
+
+<!-- History Page -->
+<!DOCTYPE html>
+<html>
+<head><title>History</title></head>
+<body>
+<h2>Your Chat History</h2>
+
+{% if chats %}
+  <ul>
+    {% for user_msg, bot_resp, timestamp in chats %}
+      <li>
+        <strong>[{{ timestamp }}]</strong><br>
+        <strong>You:</strong> {{ user_msg }}<br>
+        <strong>Bot:</strong> {{ bot_resp }}
+      </li>
+      <hr>
+    {% endfor %}
+  </ul>
+  <a href="/export_csv"><button>⬇️ Export Chat History as CSV</button></a>
+{% else %}
+  <p>No chat history found.</p>
+{% endif %}
+
+<p><a href="/">← Back to Chat</a></p>
+</body>
+</html>
+
+<!-- Admin Login -->
+<!DOCTYPE html>
+<html>
+<head><title>Admin Login</title></head>
+<body>
+<h2>Admin Login</h2>
+<form action="/admin_login" method="post">
+  <input name="username" placeholder="Admin Username" required><br>
+  <input type="password" name="password" placeholder="Admin Password" required><br>
+  <button type="submit">Login</button>
+</form>
+</body>
+</html>
+
+<!-- Admin Panel -->
+<!DOCTYPE html>
+<html>
+<head><title>Admin Dashboard</title></head>
+<body>
+<h2>Admin Dashboard</h2>
+
+<h3>All Users:</h3>
+<ul>
+{% for user_id, username in users %}
+  <li>ID: {{ user_id }} | Username: {{ username }}</li>
+{% endfor %}
+</ul>
+
+<h3>All Chats:</h3>
+<ul>
+{% for username, user_msg, bot_resp, timestamp in chats %}
+  <li>
+    <strong>{{ timestamp }}</strong> | <strong>{{ username }}</strong><br>
+    You: {{ user_msg }}<br>
+    Bot: {{ bot_resp }}
+  </li>
+  <hr>
+{% endfor %}
+</ul>
+
+<p><a href="/export_all_csv"><button>⬇️ Export All Chats as CSV</button></a></p>
+<p><a href="/logout">Logout</a></p>
+</body>
+</html>
